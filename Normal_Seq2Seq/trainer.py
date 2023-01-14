@@ -33,8 +33,8 @@ class Trainer:
                 self.optimizer.zero_grad()
                 torch.autograd.set_detect_anomaly(True)
 
-                preds = self.model(inputs=x,
-                                    target_len=7) # OW가 들어갑니다
+                preds = self.model(inputs=x, target_len=7).to(self.device) # OW가 들어갑니다
+                
 
                 loss = self.criterion(preds, y)
 
@@ -44,19 +44,12 @@ class Trainer:
                 self.optimizer.step()
 
                 running_loss += loss.item()
-                
-            
-            print("============================================")
-            print(running_loss)
-            print("============================================")
-
-
             
             train_loss = running_loss / len(self.loader)
 
             print("==================================================")
             print(f'EPOCH [{epoch}/{self.epoches}]')
-            print(f"LOSS : {train_loss:.3f}")
+            print(f"TOTAL LOSS : {running_loss:3f}\tAVG LOSS : {train_loss:.3f}")
         
         print("📃 Save the Trained Model for Prediction...")
         torch.save(self.model.state_dict(), "./Final_Model.pth")
