@@ -26,7 +26,6 @@ class NormalSeq2SeqDataset(Dataset):
 
         num_samples = ((Length - IW - OW) // stride) + 1
 
-
         Xs = np.zeros([IW, num_samples])
         Ys= np.zeros([OW, num_samples])
 
