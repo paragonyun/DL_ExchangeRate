@@ -93,7 +93,6 @@ class NormalSeq2SeqModel(nn.Module):
 
             # 결과 저장
             outputs[:, t, :] = output
-
         return outputs
 
     def predict(self, inputs, target_len) :
