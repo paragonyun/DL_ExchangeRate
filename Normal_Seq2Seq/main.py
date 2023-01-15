@@ -13,9 +13,9 @@ import torch.optim as optim
 seed_everything(seed=43)
 
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
-data_loader = return_dataloaders()
+data_loader, fitted_mm = return_dataloaders()
 
-EPOCHS = 5000
+EPOCHS = 3000
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -26,21 +26,34 @@ optimizer = optim.Adam(model.parameters(), lr=LR)
 criterion = nn.MSELoss()
 
 train = Trainer(
-            model=model,
-            loader=data_loader,
-            epoches=EPOCHS,
-            optimizer=optimizer,
-            criterion=criterion,
-            device=device
-        )
+    model=model,
+    loader=data_loader,
+    epoches=EPOCHS,
+    optimizer=optimizer,
+    criterion=criterion,
+    device=device,
+)
 
 train.doit()
 
+## Evaluation
+print("✨Start Evaluation...✨")
 
-"""
-으아아아아 일단 오카방에 물어보자..!
-어느 부분에서 Grad가 0이 되는지 한번 체크해보기 
-아니면 LSTM 의 output이 nan이 나오는 거면 내부의 grad가 nan이었을 가능성이 높다..!
-"""
+ori_df = pd.read_csv("./data/exchange_rate.csv")
+scaled = fitted_mm.transform(ori_df["rate"][-14:].values.reshape(-1, 1))
+input_data = torch.tensor(scaled).to(device).float()
 
+model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
+predict = model.predict(inputs=input_data, target_len=7)
+
+actuals = ori_df["rate"].to_numpy()
+
+print("Inverse Trasforming...")
+predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
+actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
+
+print(predict)
+
+print("Plot Results...")
+plot_result(ori_df=ori_df, preds=predict)
