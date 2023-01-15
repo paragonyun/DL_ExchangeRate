@@ -56,6 +56,7 @@ class Trainer:
             if running_loss < best_loss:
                 print("🚩 Saving Best Model...")
                 torch.save(self.model.state_dict(), "./BEST_MODEL.pth")
+                best_loss = running_loss
 
         print("📃 Save the Trained Model for Prediction...")
         torch.save(self.model.state_dict(), "./Final_Model.pth")
