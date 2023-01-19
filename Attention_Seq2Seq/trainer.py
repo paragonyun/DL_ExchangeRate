@@ -41,6 +41,8 @@ class Trainer:
                 
                 preds, attn_weights_lst = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
 
+                preds, attn_weights_lst = preds.to(self.device), attn_weights_lst.to(self.device)
+
                 loss = self.criterion(preds, y)
 
                 loss.backward()
