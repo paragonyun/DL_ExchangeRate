@@ -20,7 +20,7 @@ LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = NormalSeq2SeqModel(input_size=1, hidden_size=64).to(device)
+model = AttentionSeq2SeqModel(input_size=1, hidden_size=64).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=LR)
 criterion = nn.MSELoss()
@@ -34,7 +34,7 @@ train = Trainer(
     device=device,
 )
 
-train.doit()
+atten_weights = train.doit() # test 삼아서
 
 ## Evaluation
 print("✨Start Evaluation...✨")
@@ -53,6 +53,7 @@ print("Inverse Trasforming...")
 predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
 actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
 
+print("👀Prediction👀")
 print(predict)
 
 print("Plot Results...")
