@@ -28,6 +28,8 @@ class Trainer:
 
         best_loss = 10000
 
+        fin_atten_weights = []
+
         for epoch in range(1, self.epoches + 1):
             running_loss = 0.0
 
@@ -35,9 +37,9 @@ class Trainer:
                 x, y = x.to(self.device).float(), y.to(self.device).float()
 
                 self.optimizer.zero_grad()
-                torch.autograd.set_detect_anomaly(True)
-
-                preds = self.model(inputs=x, target_len=7).to(self.device)  # OW가 들어갑니다
+                # torch.autograd.set_detect_anomaly(True)
+                
+                preds, attn_weights_lst = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
 
                 loss = self.criterion(preds, y)
 
@@ -46,6 +48,7 @@ class Trainer:
                 self.optimizer.step()
 
                 running_loss += loss.item()
+                fin_atten_weights.append(attn_weights_lst)
 
             train_loss = running_loss / len(self.loader)
 
@@ -61,3 +64,5 @@ class Trainer:
         print("📃 Save the Trained Model for Prediction...")
         torch.save(self.model.state_dict(), "./Final_Model.pth")
         print("✅ Done!")
+
+        return fin_atten_weights
