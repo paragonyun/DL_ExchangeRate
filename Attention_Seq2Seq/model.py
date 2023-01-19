@@ -30,14 +30,14 @@ class Encoder(nn.Module):
         return lstm_output, self.hidden
 
 
-class AttentionDecoder(nn.Module):
+class Decoder(nn.Module):
     def __init__(
         self,
         input_size,
         hidden_size,
         num_layers=1,
     ):
-        super(AttentionDecoder, self).__init__()
+        super(Decoder, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -50,33 +50,44 @@ class AttentionDecoder(nn.Module):
             batch_first=True,
         )
 
-        self.encoder_weight = nn.Linear(self.hidden_size, self.hidden_size, bias=False)
-        self.decoder_weight = nn.Linear(self.hidden_size, self.hidden_size, bias=False)
-        self.v_weight = nn.Linear(self.hidden_size, 14, bias=False)
+        self.encoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
+        self.decoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
+        self.value_weight = nn.Linear(in_features=self.hidden_size, out_features=14, bias=False)
 
-        self.linear = nn.Linear(in_features=self.hidden_size, out_features=input_size)
+        self.fin_linear = nn.Linear(in_features=self.hidden_size + 14, out_features=1)
 
     def forward(self, x, encoder_input_hidden_state):
-        attn_scores = self.v_weight(torch.tanh(self.encoder_weight()))
-
-
         lstm_output, self.hidden = self.lstm(
             x.unsqueeze(-1), encoder_input_hidden_state
         )
-        output = self.linear(lstm_output)
 
-        return output, self.hidden
+        attn_scores = self.value_weight(
+            torch.tanh(
+                self.encoder_weight(encoder_input_hidden_state[-1].permute(1, 0, 2)) + 
+                self.decoder_weight(self.hidden[-1].permute(1, 0, 2))
+            )
+        )
+
+        attn_weight = torch.softmax(attn_scores, dim=2)
+
+        context_vector = torch.cat((attn_weight, lstm_output), dim=2).squeeze(1)
+        # print(attn_weight.size())
+        # print(lstm_output.size())
+
+        output = self.fin_linear(context_vector)
+        
+        return output, self.hidden, attn_weight
 
 
-class NormalSeq2SeqModel(nn.Module):
+class AttentionSeq2SeqModel(nn.Module):
     def __init__(self, input_size, hidden_size):
-        super(NormalSeq2SeqModel, self).__init__()
+        super(AttentionSeq2SeqModel, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = AttentionDecoder(input_size=input_size, hidden_size=hidden_size)
+        self.decoder = Decoder(input_size=input_size, hidden_size=hidden_size)
 
     def forward(self, inputs, target_len):  # X  # OW
         bs = inputs.shape[0]
@@ -88,18 +99,22 @@ class NormalSeq2SeqModel(nn.Module):
 
         decoder_input = inputs[:, -1, :]  # 최초 Decoder Input
 
+        attn_weights = []
+
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
-            output, hidden_state = self.decoder(decoder_input, hidden_state)
+            output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
 
-            output = output.squeeze(1)
+            #output = output.squeeze(1)
 
             # t시점의 output은 t+1 시점의 Input중 하나로 들어갑니다.
             decoder_input = output
 
             # 결과 저장
             outputs[:, t, :] = output
-        return outputs
+            attn_weights.append(attn_weight)
+
+        return outputs, attn_weights
 
     def predict(self, inputs, target_len):
         self.eval()  # Inference Mode
@@ -113,13 +128,16 @@ class NormalSeq2SeqModel(nn.Module):
         _, hidden_state = self.encoder(inputs)
         decoder_input = inputs[:, -1, :]
 
+        attn_weights = []
+
         for t in range(target_len):
-            output, hidden_state = self.decoder(decoder_input, hidden_state)
+            output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
 
             output = output.squeeze(1)
 
             decoder_input = output
 
             outputs[:, t, :] = output
+            attn_weights.append(attn_weight)
 
-        return outputs.detach().numpy()[0, :, 0]
+        return outputs.detach().numpy()[0, :, 0], attn_weights
