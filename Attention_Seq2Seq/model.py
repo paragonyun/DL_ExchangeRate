@@ -57,22 +57,21 @@ class Decoder(nn.Module):
         self.fin_linear = nn.Linear(in_features=self.hidden_size + 14, out_features=1)
 
     def forward(self, x, encoder_input_hidden_state):
+        
         lstm_output, self.hidden = self.lstm(
             x.unsqueeze(-1), encoder_input_hidden_state
         )
 
+        ## hidden state활용
         attn_scores = self.value_weight(
             torch.tanh(
-                self.encoder_weight(encoder_input_hidden_state[-1].permute(1, 0, 2)) + 
-                self.decoder_weight(self.hidden[-1].permute(1, 0, 2))
+                self.encoder_weight(encoder_input_hidden_state[0].permute(1, 0, 2)) + 
+                self.decoder_weight(self.hidden[0].permute(1, 0, 2))
             )
         )
-
         attn_weight = torch.softmax(attn_scores, dim=2)
 
         context_vector = torch.cat((attn_weight, lstm_output), dim=2).squeeze(1)
-        # print(attn_weight.size())
-        # print(lstm_output.size())
 
         output = self.fin_linear(context_vector)
         
@@ -99,8 +98,8 @@ class AttentionSeq2SeqModel(nn.Module):
 
         decoder_input = inputs[:, -1, :]  # 최초 Decoder Input
 
-        attn_weights = []
-
+        
+        total_atten_weight = torch.zeros(bs, 1, 14)
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
             output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
@@ -112,9 +111,11 @@ class AttentionSeq2SeqModel(nn.Module):
 
             # 결과 저장
             outputs[:, t, :] = output
-            attn_weights.append(attn_weight)
 
-        return outputs, attn_weights
+            # 종합적인 attn weight를 확인
+            total_atten_weight += attn_weight
+
+        return outputs, total_atten_weight
 
     def predict(self, inputs, target_len):
         self.eval()  # Inference Mode
@@ -128,16 +129,17 @@ class AttentionSeq2SeqModel(nn.Module):
         _, hidden_state = self.encoder(inputs)
         decoder_input = inputs[:, -1, :]
 
-        attn_weights = []
+        total_attn_weight = torch.zeros(bs, 1, 14)
 
         for t in range(target_len):
             output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
 
-            output = output.squeeze(1)
+            # output = output.squeeze(1)
 
             decoder_input = output
 
             outputs[:, t, :] = output
-            attn_weights.append(attn_weight)
+            
+            total_attn_weight += attn_weight
 
-        return outputs.detach().numpy()[0, :, 0], attn_weights
+        return outputs.detach().numpy()[0, :, 0], total_attn_weight
