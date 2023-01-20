@@ -45,7 +45,7 @@ input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
-predict = model.predict(inputs=input_data, target_len=7)
+predict, atten_weights = model.predict(inputs=input_data, target_len=7)
 
 actuals = ori_df["rate"].to_numpy()
 
@@ -53,6 +53,8 @@ print("Inverse Trasforming...")
 predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
 actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
 
+print(atten_weights)
+print(len(atten_weights))
 print("👀Prediction👀")
 print(predict)
 
