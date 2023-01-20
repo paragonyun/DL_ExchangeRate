@@ -87,6 +87,7 @@ class AttentionSeq2SeqModel(nn.Module):
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
         self.decoder = Decoder(input_size=input_size, hidden_size=hidden_size)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, inputs, target_len):  # X  # OW
         bs = inputs.shape[0]
@@ -99,7 +100,7 @@ class AttentionSeq2SeqModel(nn.Module):
         decoder_input = inputs[:, -1, :]  # 최초 Decoder Input
 
         
-        total_atten_weight = torch.zeros(bs, 1, 14)
+        total_atten_weight = torch.zeros(bs, 1, 14).to(self.device)
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
             output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
