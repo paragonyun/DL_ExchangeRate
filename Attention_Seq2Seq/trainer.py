@@ -28,11 +28,11 @@ class Trainer:
 
         best_loss = 10000
 
-        total_atten_weights = torch.zeros(32, 1, 14)
+        total_atten_weights = torch.zeros(32, 1, 14).to(self.device)
 
         for epoch in range(1, self.epoches + 1):
             running_loss = 0.0
-            epoch_atten_weights = torch.zeros(32, 1, 14)
+            epoch_atten_weights = torch.zeros(32, 1, 14).to(self.device)
             for x, y in tqdm(self.loader):
                 x, y = x.to(self.device).float(), y.to(self.device).float()
 
