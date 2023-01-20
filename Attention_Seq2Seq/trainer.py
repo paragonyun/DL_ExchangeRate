@@ -28,18 +28,18 @@ class Trainer:
 
         best_loss = 10000
 
-        fin_atten_weights = []
+        total_atten_weights = torch.zeros(32, 1, 14)
 
         for epoch in range(1, self.epoches + 1):
             running_loss = 0.0
-
+            epoch_atten_weights = torch.zeros(32, 1, 14)
             for x, y in tqdm(self.loader):
                 x, y = x.to(self.device).float(), y.to(self.device).float()
 
                 self.optimizer.zero_grad()
                 # torch.autograd.set_detect_anomaly(True)
                 
-                preds, attn_weights_lst = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
+                preds, atten_weights = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
 
                 preds = preds.to(self.device)
 
@@ -50,14 +50,17 @@ class Trainer:
                 self.optimizer.step()
 
                 running_loss += loss.item()
-                fin_atten_weights.append(attn_weights_lst)
+                epoch_atten_weights += atten_weights
+
+            total_atten_weights += epoch_atten_weights
 
             train_loss = running_loss / len(self.loader)
 
             print("==================================================")
             print(f"EPOCH [{epoch}/{self.epoches}]")
             print(f"TOTAL LOSS : {running_loss:3f}\tAVG LOSS : {train_loss:.3f}")
-
+            print("Attention Weights Distributions")
+            print(total_atten_weights)
             if running_loss < best_loss:
                 print("🚩 Saving Best Model...")
                 torch.save(self.model.state_dict(), "./BEST_MODEL.pth")
@@ -67,4 +70,4 @@ class Trainer:
         torch.save(self.model.state_dict(), "./Final_Model.pth")
         print("✅ Done!")
 
-        return fin_atten_weights
+        return total_atten_weights
