@@ -82,7 +82,7 @@ class Trainer:
 
                 del total_atten_weights
                 del total_atten_weights_dist
-                total_atten_weights = torch.zeros(32, 1, 14).to(self.device)
+                total_atten_weights = torch.zeros(32, 14, 1).to(self.device)
 
             if running_loss < best_loss:
                 print("🚩 Saving Best Model...")
