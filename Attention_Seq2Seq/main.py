@@ -54,7 +54,6 @@ predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
 actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
 
 print(atten_weights)
-print(len(atten_weights))
 print("👀Prediction👀")
 print(predict)
 
