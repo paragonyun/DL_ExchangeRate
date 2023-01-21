@@ -146,7 +146,7 @@ class AttentionSeq2SeqModel(nn.Module):
 
         de_hidden = hidden_state
 
-        total_attn_weight = torch.zeros(bs, 14, 1)
+        total_attn_weight = torch.zeros(bs, 14, 1).to(self.device)
 
         for t in range(target_len):
             output, hidden_state, attn_weight = self.decoder(decoder_input, de_hidden, encoder_output)
