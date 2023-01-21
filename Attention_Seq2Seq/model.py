@@ -141,13 +141,15 @@ class AttentionSeq2SeqModel(nn.Module):
 
         outputs = torch.zeros(bs, target_len, input_size)
 
-        _, hidden_state = self.encoder(inputs)
+        encoder_output, hidden_state = self.encoder(inputs)
         decoder_input = inputs[:, -1, :]
 
-        total_attn_weight = torch.zeros(bs, 1, 14)
+        de_hidden = hidden_state
+
+        total_attn_weight = torch.zeros(bs, 14, 1)
 
         for t in range(target_len):
-            output, hidden_state, attn_weight = self.decoder(decoder_input, hidden_state)
+            output, hidden_state, attn_weight = self.decoder(decoder_input, de_hidden, encoder_output)
 
             # output = output.squeeze(1)
 
