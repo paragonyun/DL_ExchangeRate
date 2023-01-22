@@ -68,21 +68,21 @@ class Trainer:
             print(f"EPOCH [{epoch}/{self.epoches}]")
             print(f"TOTAL LOSS : {running_loss:4f}\tAVG LOSS : {train_loss:.4f}")
 
-            # if epoch % 100 == 0:
-            print("Attention Weights Distributions")
-            print(total_atten_weights)
-            print(total_atten_weights_dist)
-            with open(f"./Attention_Weights_ep{epoch}.pkl", "wb") as f:
-                pickle.dump(total_atten_weights, f)
+            if epoch % 100 == 0:
+                print("Attention Weights Distributions")
+                print(total_atten_weights)
+                print(total_atten_weights_dist)
+                with open(f"./Attention_Weights_ep{epoch}.pkl", "wb") as f:
+                    pickle.dump(total_atten_weights, f)
 
-            with open(f"./Attention_Distribution_ep{epoch}.pkl", "wb") as f:
-                pickle.dump(total_atten_weights_dist, f)
-            
-            print("👍 Attention Weight and Distribusion is Saved")
+                with open(f"./Attention_Distribution_ep{epoch}.pkl", "wb") as f:
+                    pickle.dump(total_atten_weights_dist, f)
+                
+                print("👍 Attention Weight and Distribusion is Saved")
 
-            del total_atten_weights
-            del total_atten_weights_dist
-            total_atten_weights = torch.zeros(32, 14).to(self.device)
+                del total_atten_weights
+                del total_atten_weights_dist
+                total_atten_weights = torch.zeros(32, 14).to(self.device)
 
             if running_loss < best_loss:
                 print("🚩 Saving Best Model...")
