@@ -33,6 +33,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(
         self,
+        events_mat,
         input_size,
         hidden_size,
         num_layers=1,
@@ -55,6 +56,13 @@ class Decoder(nn.Module):
         self.value_weight = nn.Linear(in_features=self.hidden_size, out_features=1, bias=False)
 
         self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
+
+        self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size)
+        
+        ## (B, 10, 7) -> (B, 10, 64)가 됨.
+        self.vectorized_events = self.event_vectorizer(events_mat)
+
+
 
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
@@ -79,7 +87,11 @@ class Decoder(nn.Module):
         context_vector = torch.bmm(attn_weight.unsqueeze(1), encoder_output).squeeze(1)
         # print("CV : ", context_vector.size()) # 32, 64
 
-        new_input = torch.cat((context_vector, x), dim=1).unsqueeze(-1)
+        ## Calculate Similiarity scores between context_vector and vectorized events!
+        sim_scores = torch.bmm(context_vector.unsqueeze(1), self.vectorized_events.transpose(1, 2)).squeeze(1)
+
+        # And concatenate them!
+        new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1)
 
         # new_input = new_input.permute(0, 2, 1)
         # print("new input size: ", new_input.size()) # 32, 65, 1
@@ -98,14 +110,14 @@ class Decoder(nn.Module):
 
 
 class AttentionSeq2SeqModel(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, events_mat, input_size, hidden_size):
         super(AttentionSeq2SeqModel, self).__init__()
-
+        
         self.input_size = input_size
         self.hidden_size = hidden_size
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = Decoder(input_size=input_size, hidden_size=hidden_size)
+        self.decoder = Decoder(events_mat=events_mat, input_size=input_size, hidden_size=hidden_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, inputs, target_len):  # X  # OW
