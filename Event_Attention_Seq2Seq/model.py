@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 class Encoder(nn.Module):
     """Cell은 LSTM으로 했습니다."""
 
@@ -39,7 +38,7 @@ class Decoder(nn.Module):
         num_layers=1,
     ):
         super(Decoder, self).__init__()
-
+        self.events_mat = events_mat
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -57,10 +56,9 @@ class Decoder(nn.Module):
 
         self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
 
-        self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size)
+        self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size, bias=False)
         
-        ## (B, 10, 7) -> (B, 10, 64)가 됨.
-        self.vectorized_events = self.event_vectorizer(events_mat)
+
 
 
 
@@ -87,18 +85,19 @@ class Decoder(nn.Module):
         context_vector = torch.bmm(attn_weight.unsqueeze(1), encoder_output).squeeze(1)
         # print("CV : ", context_vector.size()) # 32, 64
 
+        vectorized_events = self.event_vectorizer(self.events_mat)
+
         ## Calculate Similiarity scores between context_vector and vectorized events!
-        sim_scores = torch.bmm(context_vector.unsqueeze(1), self.vectorized_events.transpose(1, 2)).squeeze(1)
+        sim_scores = torch.matmul(context_vector, vectorized_events.permute(1,0))
 
         # And concatenate them!
-        new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1)
+        new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
 
-        # new_input = new_input.permute(0, 2, 1)
-        # print("new input size: ", new_input.size()) # 32, 65, 1
+        # print("new input size: ", new_input.size()) # 32, 75, 1
 
         _, hidden = self.lstm(new_input, hidden) 
 
-        # print(output.size()) # 32, 65, 64
+        # print(output.size()) # 32, 75, 64
         # print("output Size : ", output.size()) # 32, 64
         # print("hidden Size : ", hidden[0].size()) # 1, 32, 64
         # print("Last Hidden : ", hidden[0][-1].size()) # 32, 64 오!! 이거네
