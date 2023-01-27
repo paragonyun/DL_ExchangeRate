@@ -21,7 +21,7 @@ class NormalSeq2SeqDataset(Dataset):
 
     def __init__(self, df, IW=14, OW=7, stride=1):
         # 전처리
-        prep_df, self.fitted_mm = return_prep_data(df)
+        prep_df, self.event_lst, self.fitted_mm = return_prep_data(df)
 
         Length = df.shape[0]
 
@@ -37,6 +37,7 @@ class NormalSeq2SeqDataset(Dataset):
 
             y_start = stride * i + IW
             y_end = y_start + OW
+
             Ys[:, i] = prep_df["rate"][y_start:y_end]
 
         Xs = Xs.reshape(Xs.shape[0], Xs.shape[1], 1).transpose((1, 0, 2))
