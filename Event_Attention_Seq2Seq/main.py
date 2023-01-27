@@ -13,14 +13,14 @@ import torch.optim as optim
 seed_everything(seed=43)
 
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
-data_loader, fitted_mm = return_dataloaders()
+data_loader, events_mat, fitted_mm = return_dataloaders()
 
 EPOCHS = 3000
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = AttentionSeq2SeqModel(input_size=1, hidden_size=64).to(device)
+model = AttentionSeq2SeqModel(events_mat=events_mat, input_size=1, hidden_size=64).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=LR)
 criterion = nn.MSELoss()
@@ -53,9 +53,11 @@ print("Inverse Trasforming...")
 predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
 actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
 
+predictions = change_to_original(df=ori_df, preds=predict)
+
 print(atten_weights)
 print("👀Prediction👀")
-print(predict)
+print(predictions)
 
 print("Plot Results...")
-plot_result(ori_df=ori_df, preds=predict)
+plot_result(ori_df=ori_df, preds=predictions)
