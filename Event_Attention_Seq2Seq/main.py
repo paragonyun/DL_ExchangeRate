@@ -13,9 +13,9 @@ import torch.optim as optim
 seed_everything(seed=43)
 
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
-data_loader, events_mat, fitted_mm = return_dataloaders()
+data_loader, events_mat, fitted_ss = return_dataloaders()
 
-EPOCHS = 3000
+EPOCHS = 1
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -40,7 +40,8 @@ atten_weights = train.doit() # test 삼아서
 print("✨Start Evaluation...✨")
 
 ori_df = pd.read_csv("./data/exchange_rate.csv")
-scaled = fitted_mm.transform(ori_df["rate"][-14:].values.reshape(-1, 1))
+diffs = ori_df["rate"].diff()
+scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
 input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
@@ -50,8 +51,8 @@ predict, atten_weights = model.predict(inputs=input_data, target_len=7)
 actuals = ori_df["rate"].to_numpy()
 
 print("Inverse Trasforming...")
-predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
-actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
+predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
+actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
 
 predictions = change_to_original(df=ori_df, preds=predict)
 
