@@ -58,7 +58,8 @@ class Decoder(nn.Module):
 
         self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size, bias=False)
         
-
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"    
+        self.events_mat = self.events_mat.to(self.device)
 
 
 
