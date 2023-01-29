@@ -15,7 +15,7 @@ seed_everything(seed=43)
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
 data_loader, events_mat, fitted_ss = return_dataloaders()
 
-EPOCHS = 3000
+EPOCHS = 1
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,7 +46,7 @@ input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
-predict, atten_weights, sim_scores, fin_ = model.predict(inputs=input_data, target_len=7)
+predict, atten_weights, sim_scores = model.predict(inputs=input_data, target_len=7)
 
 actuals = ori_df["rate"].to_numpy()
 print("Original Prediction (Before Inverse Transform)")
