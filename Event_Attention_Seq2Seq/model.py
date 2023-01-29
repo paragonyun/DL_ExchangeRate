@@ -89,7 +89,9 @@ class Decoder(nn.Module):
         vectorized_events = self.event_vectorizer(self.events_mat)
 
         ## Calculate Similiarity scores between context_vector and vectorized events!
-        sim_scores = torch.matmul(context_vector, vectorized_events.permute(1,0))
+        sim_scores = torch.tanh(
+            torch.matmul(context_vector, vectorized_events.permute(1,0))
+        ) # 32, 10
 
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
@@ -106,7 +108,7 @@ class Decoder(nn.Module):
         fin_output = self.fin_linear(hidden[0][-1])
         # print("Final Ouptut Size : ", fin_output.size()) # 32, 1
 
-        return fin_output, hidden, attn_weight
+        return fin_output, hidden, attn_weight, sim_scores
 
 
 class AttentionSeq2SeqModel(nn.Module):
@@ -135,7 +137,8 @@ class AttentionSeq2SeqModel(nn.Module):
         total_atten_weight = torch.zeros(bs, 14).to(self.device)
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
-            output, de_hidden, attn_weight = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
+            ## 학습할 땐 sim_scores 확인 안 하는 걸로...
+            output, de_hidden, attn_weight, _ = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
 
             # output = output.squeeze(1)
 
@@ -170,7 +173,7 @@ class AttentionSeq2SeqModel(nn.Module):
         total_attn_weight = torch.zeros(bs, 14).to(self.device)
 
         for t in range(target_len):
-            output, de_hidden, attn_weight = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
+            output, de_hidden, attn_weight, sim_scores = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
 
             # output = output.squeeze(1)
 
@@ -180,4 +183,4 @@ class AttentionSeq2SeqModel(nn.Module):
             
             total_attn_weight += attn_weight
 
-        return outputs.detach().numpy()[0, :, 0], total_attn_weight
+        return outputs.detach().numpy()[0, :, 0], total_attn_weight, sim_scores
