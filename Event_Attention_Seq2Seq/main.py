@@ -15,7 +15,7 @@ seed_everything(seed=43)
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
 data_loader, events_mat, fitted_ss = return_dataloaders()
 
-EPOCHS = 1
+EPOCHS = 3000
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,17 +46,24 @@ input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
-predict, atten_weights = model.predict(inputs=input_data, target_len=7)
+predict, atten_weights, sim_scores, fin_ = model.predict(inputs=input_data, target_len=7)
 
 actuals = ori_df["rate"].to_numpy()
+print("Original Prediction (Before Inverse Transform)")
+print(predict, "\n")
 
 print("Inverse Trasforming...")
 predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
 actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
+print("Inversed Changes\n", predict)
 
 predictions = change_to_original(df=ori_df, preds=predict)
 
-print(atten_weights)
+print("\nAttention Weights")
+print(atten_weights,"\n")
+print("\nEvent Similarity (Check the prep.py's events)")
+print(sim_scores, "\n\n")
+
 print("👀Prediction👀")
 print(predictions)
 
