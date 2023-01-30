@@ -19,8 +19,8 @@ def return_prep_data(ori_df):
     copy_df["rate"] = ss.fit_transform(copy_df["rate"].values.reshape(-1, 1))
 
     print("Impact Event를 찾는 중...")
-    times = ["1998/01/03", "1997/12/24", "2008/10/17", "2008/10/08", "2020/03/20", 
-            "1997/12/27", "1997/12/17", "2008/10/31", "2009/03/12", "2022/11/14" ]
+    times = ["1998/11/24", "1998/01/03", "2020/12/07", "2008/10/08", "2008/08/27", 
+            "2013/04/12", "2010/06/30", "2008/04/22", "2014/03/07", "2014/08/21" ]
     event_tensor = find_impact_events(ori_df=ori_df, times=times)
     
     print("✅ Done!")
