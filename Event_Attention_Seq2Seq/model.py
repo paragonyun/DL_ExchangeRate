@@ -24,8 +24,11 @@ class Encoder(nn.Module):
             dropout=0.3
         )
 
+        self.ln = nn.LayerNorm(hidden_size)
+
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
+        lstm_output = self.ln(lstm_output)
 
         return lstm_output, self.hidden
 
@@ -63,6 +66,7 @@ class Decoder(nn.Module):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"    
         self.events_mat = self.events_mat.to(self.device)
 
+        self.ln = nn.LayerNorm(hidden_size)
 
 
     def forward(self, x, hidden, encoder_output):
@@ -76,8 +80,8 @@ class Decoder(nn.Module):
         # print((self.encoder_weight(encoder_output) + self.decoder_weight(hidden[0].permute(1, 0, 2))).size() )
         attn_scores = self.value_weight(
             torch.tanh(
-                self.encoder_weight(encoder_output) + 
-                self.decoder_weight(hidden[0].permute(1, 0, 2))
+                    self.ln(self.encoder_weight(encoder_output)) + 
+                    self.ln(self.decoder_weight(hidden[0].permute(1, 0, 2)))
             )
         ).squeeze(2) 
         # print(attn_scores.size()) # 32, 14
