@@ -21,6 +21,7 @@ class Encoder(nn.Module):
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
+            dropout=0.3
         )
 
     def forward(self, x):
@@ -48,6 +49,7 @@ class Decoder(nn.Module):
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
+            dropout=0.3
         )
 
         self.encoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
