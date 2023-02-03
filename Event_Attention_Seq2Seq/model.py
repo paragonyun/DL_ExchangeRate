@@ -62,7 +62,8 @@ class Decoder(nn.Module):
         self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
 
         self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size, bias=False)
-        
+        self.event_score = nn.Linear(in_features=10, out_features=10)        
+
         self.device = "cuda" if torch.cuda.is_available() else "cpu"    
         self.events_mat = self.events_mat.to(self.device)
 
@@ -95,8 +96,10 @@ class Decoder(nn.Module):
         vectorized_events = self.event_vectorizer(self.events_mat)
 
         ## Calculate Similiarity scores between context_vector and vectorized events!
-        sim_scores = torch.tanh(
-            torch.matmul(context_vector, vectorized_events.permute(1,0))
+        sim_scores = self.event_score(
+            torch.tanh(
+                torch.matmul(context_vector, vectorized_events.permute(1,0))
+            )
         ) # 32, 10
 
         # And concatenate them!
