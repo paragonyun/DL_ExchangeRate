@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
 
 class Encoder(nn.Module):
     """Cell은 LSTM으로 했습니다."""
@@ -96,12 +98,13 @@ class Decoder(nn.Module):
         vectorized_events = self.event_vectorizer(self.events_mat)
 
         ## Calculate Similiarity scores between context_vector and vectorized events!
-        sim_scores = self.event_score(
-            torch.tanh(
-                torch.matmul(context_vector, vectorized_events.permute(1,0))
-            )
-        ) # 32, 10
-
+        sim_scores = F.sigmoid(
+                self.event_score(
+                torch.tanh(
+                    torch.matmul(context_vector, vectorized_events.permute(1,0))
+                )
+            ) # 32, 10
+        )
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
 
