@@ -15,7 +15,7 @@ seed_everything(seed=43)
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
 data_loader, fitted_ss = return_dataloaders()
 
-EPOCHS = 1
+EPOCHS = 3000
 LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"

@@ -10,4 +10,4 @@ def return_dataloaders():
     Dataset = NormalSeq2SeqDataset(df=df, IW=14, OW=7, stride=1)
     loader = DataLoader(Dataset, batch_size=32)
 
-    return loader, Dataset.fitted_mm
+    return loader, Dataset.fitted_ss

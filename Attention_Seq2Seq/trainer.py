@@ -27,7 +27,7 @@ class Trainer:
         print(f"Using Resource : {self.device}")
         self.model.train()
 
-        best_loss = 10000
+        best_loss = 10000000
 
         total_atten_weights = torch.zeros(32, 14).to(self.device)
 
