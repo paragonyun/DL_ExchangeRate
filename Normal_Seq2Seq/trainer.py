@@ -26,7 +26,7 @@ class Trainer:
         print(f"Using Resource : {self.device}")
         self.model.train()
 
-        best_loss = 10000
+        best_loss = 100000000
 
         for epoch in range(1, self.epoches + 1):
             running_loss = 0.0

@@ -56,6 +56,7 @@ class Decoder(nn.Module):
         lstm_output, self.hidden = self.lstm(
             x.unsqueeze(-1), encoder_input_hidden_state
         )
+
         output = self.linear(lstm_output)
 
         return output, self.hidden

@@ -13,7 +13,7 @@ import torch.optim as optim
 seed_everything(seed=43)
 
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
-data_loader, fitted_mm = return_dataloaders()
+data_loader, fitted_ss = return_dataloaders()
 
 EPOCHS = 3000
 LR = 0.001
@@ -40,7 +40,8 @@ train.doit()
 print("✨Start Evaluation...✨")
 
 ori_df = pd.read_csv("./data/exchange_rate.csv")
-scaled = fitted_mm.transform(ori_df["rate"][-14:].values.reshape(-1, 1))
+diffs = ori_df["rate"].diff()
+scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
 input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
@@ -48,12 +49,18 @@ model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 predict = model.predict(inputs=input_data, target_len=7)
 
 actuals = ori_df["rate"].to_numpy()
+print("Original Prediction (Before Inverse Transform)")
+print(predict, "\n")
 
 print("Inverse Trasforming...")
-predict = fitted_mm.inverse_transform(predict.reshape(-1, 1))
-actuals = fitted_mm.inverse_transform(actuals.reshape(-1, 1))
+predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
+actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
+print("Inversed Changes\n", predict)
 
-print(predict)
+predictions = change_to_original(df=ori_df, preds=predict)
+
+print("👀Prediction👀")
+print(predictions)
 
 print("Plot Results...")
-plot_result(ori_df=ori_df, preds=predict)
+plot_result(ori_df=ori_df, preds=predictions)
