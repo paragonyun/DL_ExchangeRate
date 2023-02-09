@@ -21,7 +21,7 @@ class NormalSeq2SeqDataset(Dataset):
 
     def __init__(self, df, IW=14, OW=7, stride=1):
         # 전처리
-        prep_df, self.fitted_mm = return_prep_data(df)
+        prep_df, self.fitted_ss = return_prep_data(df)
 
         Length = df.shape[0]
 

@@ -26,3 +26,14 @@ def plot_result(ori_df, preds):
     plt.savefig('./Results.png')
     plt.legend()
     plt.show()
+
+def change_to_original(df, preds):
+    fin_value = df['rate'].iloc[-1]
+    # print(fin_value)
+    fin_preds = [fin_value]
+    for diff in preds:
+        fin_value += diff
+        fin_preds.append(fin_value)
+    fin_preds.pop(0)
+    
+    return fin_preds
