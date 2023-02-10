@@ -98,7 +98,7 @@ class Decoder(nn.Module):
         vectorized_events = self.event_vectorizer(self.events_mat)
 
         ## Calculate Similiarity scores between context_vector and vectorized events!
-        sim_scores = F.sigmoid(
+        sim_scores = torch.sigmoid(
                 self.event_score(
                 torch.tanh(
                     torch.matmul(context_vector, vectorized_events.permute(1,0))
@@ -183,6 +183,7 @@ class AttentionSeq2SeqModel(nn.Module):
         de_hidden = hidden_state
 
         total_attn_weight = torch.zeros(bs, 14).to(self.device)
+        total_sim_scores = torch.zeros(bs, 10).to(self.device)
 
         for t in range(target_len):
             output, de_hidden, attn_weight, sim_scores = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
@@ -194,5 +195,6 @@ class AttentionSeq2SeqModel(nn.Module):
             outputs[:, t, :] = output
             
             total_attn_weight += attn_weight
+            total_sim_scores += sim_scores
 
-        return outputs.detach().numpy()[0, :, 0], total_attn_weight, sim_scores
+        return outputs.detach().numpy()[0, :, 0], total_attn_weight, total_sim_scores
