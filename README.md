@@ -11,6 +11,9 @@
 > 
 > 3. 기본적인 형태부터 Attention, Event Attention을 적용해나가는 과정을 담음.
 
+> Event Attention: 매 예측 step 마다, 과거 impact가 컸던 event와의 유사도를 비교하여 해당 정보를 반영할 수 있는 모델.
+> 과거의 traumatic한 정보를 고려한다는 아이디어에서 착안
+
 <br>
 
 <br>
