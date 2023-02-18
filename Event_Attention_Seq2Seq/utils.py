@@ -37,9 +37,3 @@ def change_to_original(df, preds):
     fin_preds.pop(0)
     
     return fin_preds
-
-# import pandas as pd
-# ori_df = pd.read_csv("./data/exchange_rate.csv")
-# d = change_to_original(ori_df, preds=[0.01713673, 0.01578333, 0.01577762, 0.0157776,  0.0157776,  0.015777, 0.0157776 ])
-
-# print(d)
