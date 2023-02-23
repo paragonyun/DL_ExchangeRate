@@ -26,11 +26,8 @@ class Encoder(nn.Module):
             dropout=0.3
         )
 
-        self.ln = nn.LayerNorm(hidden_size)
-
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
-        lstm_output = self.ln(lstm_output)
 
         return lstm_output, self.hidden
 
@@ -68,7 +65,6 @@ class Decoder(nn.Module):
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"    
         self.events_mat = self.events_mat.to(self.device)
-
 
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
