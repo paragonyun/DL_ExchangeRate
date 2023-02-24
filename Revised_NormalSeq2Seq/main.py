@@ -39,14 +39,43 @@ train.doit()
 ## Evaluation
 print("✨Start Evaluation...✨")
 
-ori_df = pd.read_csv("./data/exchange_rate.csv")
+ori_df = pd.read_csv("./data/for_oct_revised_pred.csv")
 diffs = ori_df["rate"].diff()
 scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
 input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
-predict = model.predict(inputs=input_data, target_len=7)
+predict = model.predict(inputs=input_data, target_len=20)
+
+actuals = ori_df["rate"].to_numpy()
+print("Original Prediction (Before Inverse Transform)")
+print(predict, "\n")
+
+print("Inverse Trasforming...")
+predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
+actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
+print("Inversed Changes\n", predict)
+
+predictions = change_to_original(df=ori_df, preds=predict)
+
+print("👀Prediction👀")
+print(predictions)
+
+print("Plot Results...")
+plot_result(ori_df=ori_df, preds=predictions)
+
+## 23년 1월 예측 - input : 22년 10,11,12월 
+print("✨Start Evaluation...✨")
+
+ori_df = pd.read_csv("./data/for_23y_revised_rate.csv")
+diffs = ori_df["rate"].diff()
+scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
+input_data = torch.tensor(scaled).to(device).float()
+
+model.load_state_dict(torch.load("./BEST_MODEL.pth"))
+
+predict = model.predict(inputs=input_data, target_len=20)
 
 actuals = ori_df["rate"].to_numpy()
 print("Original Prediction (Before Inverse Transform)")
