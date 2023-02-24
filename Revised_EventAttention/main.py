@@ -68,9 +68,8 @@ print(sim_scores, "\n\n")
 print("👀Prediction👀")
 print(predictions)
 
-
 ## 23년 1월 예측 - input : 22년 10,11,12월 
-ori_df = pd.read_csv("./data/for_23y_revised_pred.csv")
+ori_df = pd.read_csv("./data/for_23y_revised_rate.csv")
 diffs = ori_df["rate"].diff()
 scaled = fitted_ss.transform(diffs.iloc[-60:].values.reshape(-1, 1))
 input_data = torch.tensor(scaled).to(device).float()
