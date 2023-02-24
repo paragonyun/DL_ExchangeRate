@@ -52,8 +52,8 @@ class Trainer:
 
                 running_loss += loss.item()
                 
-                if atten_weights.size(0) == 29:
-                    temp_tensor = torch.zeros(3, 60).to(self.device)
+                if atten_weights.size(0) == 22:
+                    temp_tensor = torch.zeros(10, 60).to(self.device)
                     atten_weights = torch.cat((atten_weights, temp_tensor), dim=0)
 
                 epoch_atten_weights += atten_weights
