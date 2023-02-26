@@ -13,6 +13,7 @@
 
 > Event Attention: 매 예측 step 마다, 과거 impact가 컸던 event와의 유사도를 비교하여 해당 정보를 반영할 수 있는 모델.
 > 과거의 traumatic한 정보를 고려한다는 아이디어에서 착안
+> 예측을 진행할 때, Input Sequence의 Temporal한 정보를 반영함과 동시에 과거의 특정 시점과의 비교를 동시에 진행한다는 것이 차이점.
 
 <br>
 
