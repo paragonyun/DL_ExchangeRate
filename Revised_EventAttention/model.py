@@ -26,6 +26,8 @@ class Encoder(nn.Module):
             dropout=0.3
         )
 
+        self.ln = nn.LayerNorm(hidden_size)
+
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
 
@@ -65,6 +67,9 @@ class Decoder(nn.Module):
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"    
         self.events_mat = self.events_mat.to(self.device)
+
+        self.ln = nn.LayerNorm(hidden_size)
+
 
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
@@ -140,7 +145,7 @@ class AttentionSeq2SeqModel(nn.Module):
 
         de_hidden = hidden_state
 
-        total_atten_weight = torch.zeros(bs, 60).to(self.device)
+        total_atten_weight = torch.zeros(bs, 14).to(self.device)
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
             ## 학습할 땐 sim_scores 확인 안 하는 걸로...
@@ -176,7 +181,7 @@ class AttentionSeq2SeqModel(nn.Module):
 
         de_hidden = hidden_state
 
-        total_attn_weight = torch.zeros(bs, 60).to(self.device)
+        total_attn_weight = torch.zeros(bs, 14).to(self.device)
         total_sim_scores = torch.zeros(bs, 10).to(self.device)
 
         for t in range(target_len):

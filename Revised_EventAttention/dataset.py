@@ -19,7 +19,7 @@ class NormalSeq2SeqDataset(Dataset):
                 = 6//1 + 1 = 7개
     """
 
-    def __init__(self, df, IW=60, OW=20, stride=1):
+    def __init__(self, df, IW=14, OW=7, stride=1):
         # 전처리
         prep_df, self.event_lst, self.fitted_mm = return_prep_data(df)
 

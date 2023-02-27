@@ -6,8 +6,8 @@ from dataset import NormalSeq2SeqDataset
 
 
 def return_dataloaders():
-    df = pd.read_csv("./data/revised_exchange_rate.csv")
-    Dataset = NormalSeq2SeqDataset(df=df, IW=60, OW=20, stride=1)
+    df = pd.read_csv("./data/til_aug_rate.csv")
+    Dataset = NormalSeq2SeqDataset(df=df, IW=14, OW=7, stride=1)
     loader = DataLoader(Dataset, batch_size=32)
 
     return loader,  Dataset.event_lst, Dataset.fitted_mm

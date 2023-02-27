@@ -39,15 +39,14 @@ atten_weights = train.doit() # test 삼아서
 ## Evaluation
 print("✨Start Evaluation...✨")
 
-## 22년 10월 예측 - input : 22년 7,8,9월 /
-ori_df = pd.read_csv("./data/for_oct_revised_pred.csv")
+ori_df = pd.read_csv("./data/til_aug_rate.csv")
 diffs = ori_df["rate"].diff()
-scaled = fitted_ss.transform(diffs.iloc[-60:].values.reshape(-1, 1))
+scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
 input_data = torch.tensor(scaled).to(device).float()
 
 model.load_state_dict(torch.load("./BEST_MODEL.pth"))
 
-predict, atten_weights, sim_scores = model.predict(inputs=input_data, target_len=20)
+predict, atten_weights, sim_scores = model.predict(inputs=input_data, target_len=7)
 
 actuals = ori_df["rate"].to_numpy()
 print("Original Prediction (Before Inverse Transform)")
@@ -68,31 +67,5 @@ print(sim_scores, "\n\n")
 print("👀Prediction👀")
 print(predictions)
 
-## 23년 1월 예측 - input : 22년 10,11,12월 
-ori_df = pd.read_csv("./data/for_23y_revised_rate.csv")
-diffs = ori_df["rate"].diff()
-scaled = fitted_ss.transform(diffs.iloc[-60:].values.reshape(-1, 1))
-input_data = torch.tensor(scaled).to(device).float()
-
-model.load_state_dict(torch.load("./BEST_MODEL.pth"))
-
-predict, atten_weights, sim_scores = model.predict(inputs=input_data, target_len=20)
-
-actuals = ori_df["rate"].to_numpy()
-print("Original Prediction (Before Inverse Transform)")
-print(predict, "\n")
-
-print("Inverse Trasforming...")
-predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
-actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
-print("Inversed Changes\n", predict)
-
-predictions = change_to_original(df=ori_df, preds=predict)
-
-print("\nAttention Weights")
-print(atten_weights,"\n")
-print("\nEvent Similarity (Check the prep.py's events)")
-print(sim_scores, "\n\n")
-
-print("👀Prediction👀")
-print(predictions)
+print("Plot Results...")
+plot_result(ori_df=ori_df, preds=predictions)

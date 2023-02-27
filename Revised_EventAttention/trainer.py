@@ -29,18 +29,18 @@ class Trainer:
 
         best_loss = 10000
 
-        total_atten_weights = torch.zeros(32, 60).to(self.device)
+        total_atten_weights = torch.zeros(32, 14).to(self.device)
 
         for epoch in range(1, self.epoches + 1):
             running_loss = 0.0
-            epoch_atten_weights = torch.zeros(32, 60).to(self.device)
+            epoch_atten_weights = torch.zeros(32, 14).to(self.device)
             for x, y in tqdm(self.loader):
                 x, y = x.to(self.device).float(), y.to(self.device).float()
 
                 self.optimizer.zero_grad()
                 # torch.autograd.set_detect_anomaly(True)
                 
-                preds, atten_weights = self.model(inputs=x, target_len=20)#.to(self.device)  # OW가 들어갑니다
+                preds, atten_weights = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
 
                 preds = preds.to(self.device)
 
@@ -52,8 +52,8 @@ class Trainer:
 
                 running_loss += loss.item()
                 
-                if atten_weights.size(0) == 22:
-                    temp_tensor = torch.zeros(10, 60).to(self.device)
+                if atten_weights.size(0) == 24:
+                    temp_tensor = torch.zeros(8, 14).to(self.device)
                     atten_weights = torch.cat((atten_weights, temp_tensor), dim=0)
 
                 epoch_atten_weights += atten_weights
@@ -82,7 +82,7 @@ class Trainer:
 
                 del total_atten_weights
                 del total_atten_weights_dist
-                total_atten_weights = torch.zeros(32, 60).to(self.device)
+                total_atten_weights = torch.zeros(32, 14).to(self.device)
 
             if running_loss < best_loss:
                 print("🚩 Saving Best Model...")
