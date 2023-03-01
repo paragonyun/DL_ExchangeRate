@@ -40,13 +40,13 @@ class Trainer:
                 self.optimizer.zero_grad()
                 # torch.autograd.set_detect_anomaly(True)
                 
-                preds, atten_weights = self.model(inputs=x, target_len=7)#.to(self.device)  # OW가 들어갑니다
+                preds, atten_weights = self.model(inputs=x, target_len=7)  # OW가 들어갑니다
 
                 preds = preds.to(self.device)
 
                 loss = self.criterion(preds, y)
 
-                loss.backward(retain_graph=True)
+                loss.backward()
 
                 self.optimizer.step()
 
