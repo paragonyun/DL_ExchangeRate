@@ -20,7 +20,12 @@ LR = 0.001
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = AttentionSeq2SeqModel(events_mat=events_mat, input_size=1, hidden_size=64).to(device)
+with torch.no_grad():
+    vectorizer = nn.Linear(in_features=7, out_features=64, bias=False)
+
+vectorized_events = vectorizer(events_mat).to(device)
+
+model = AttentionSeq2SeqModel(vectorized_events_mat=vectorized_events, input_size=1, hidden_size=64).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=LR)
 criterion = nn.MSELoss()

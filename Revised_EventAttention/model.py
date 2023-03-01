@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class Encoder(nn.Module):
     """Cell은 LSTM으로 했습니다."""
 
@@ -26,8 +25,6 @@ class Encoder(nn.Module):
             dropout=0.3
         )
 
-        self.ln = nn.LayerNorm(hidden_size)
-
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
 
@@ -37,13 +34,12 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(
         self,
-        events_mat,
+        vectorized_events_mat,
         input_size,
         hidden_size,
         num_layers=1,
     ):
         super(Decoder, self).__init__()
-        self.events_mat = events_mat
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -62,14 +58,11 @@ class Decoder(nn.Module):
 
         self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
 
-        self.event_vectorizer = nn.Linear(in_features=7, out_features=self.hidden_size, bias=False)
         self.event_score = nn.Linear(in_features=10, out_features=10)        
 
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"    
-        self.events_mat = self.events_mat.to(self.device)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"   
 
-        self.ln = nn.LayerNorm(hidden_size)
-
+        self.vectorized_events_mat=vectorized_events_mat
 
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
@@ -94,15 +87,9 @@ class Decoder(nn.Module):
         context_vector = torch.bmm(attn_weight.unsqueeze(1), encoder_output).squeeze(1)
         # print("CV : ", context_vector.size()) # 32, 64
 
-        vectorized_events = self.event_vectorizer(self.events_mat)
-
         ## Calculate Similiarity scores between context_vector and vectorized events!
         sim_scores = torch.sigmoid(
-                self.event_score(
-                torch.tanh(
-                    torch.matmul(context_vector, vectorized_events.permute(1,0))
-                )
-            ) # 32, 10
+                    torch.matmul(context_vector, self.vectorized_events_mat.permute(1,0))
         )
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
@@ -123,14 +110,14 @@ class Decoder(nn.Module):
 
 
 class AttentionSeq2SeqModel(nn.Module):
-    def __init__(self, events_mat, input_size, hidden_size):
+    def __init__(self, vectorized_events_mat, input_size, hidden_size):
         super(AttentionSeq2SeqModel, self).__init__()
         
         self.input_size = input_size
         self.hidden_size = hidden_size
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = Decoder(events_mat=events_mat, input_size=input_size, hidden_size=hidden_size)
+        self.decoder = Decoder(vectorized_events_mat=vectorized_events_mat, input_size=input_size, hidden_size=hidden_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, inputs, target_len):  # X  # OW
@@ -152,7 +139,6 @@ class AttentionSeq2SeqModel(nn.Module):
             output, de_hidden, attn_weight, _ = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
 
             # output = output.squeeze(1)
-
 
             # t시점의 output은 t+1 시점의 Input중 하나로 들어갑니다.
             decoder_input = output
@@ -197,3 +183,4 @@ class AttentionSeq2SeqModel(nn.Module):
             total_sim_scores += sim_scores
 
         return outputs.detach().numpy()[0, :, 0], total_attn_weight, total_sim_scores
+

@@ -46,14 +46,14 @@ class Trainer:
 
                 loss = self.criterion(preds, y)
 
-                loss.backward()
+                loss.backward(retain_graph=True)
 
                 self.optimizer.step()
 
                 running_loss += loss.item()
                 
-                if atten_weights.size(0) == 24:
-                    temp_tensor = torch.zeros(8, 14).to(self.device)
+                if atten_weights.size(0) == 28:
+                    temp_tensor = torch.zeros(4, 14).to(self.device)
                     atten_weights = torch.cat((atten_weights, temp_tensor), dim=0)
 
                 epoch_atten_weights += atten_weights
