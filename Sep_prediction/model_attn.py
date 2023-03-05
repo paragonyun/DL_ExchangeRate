@@ -127,7 +127,6 @@ class AttentionSeq2SeqModel(nn.Module):
 
             # output = output.squeeze(1)
 
-
             # t시점의 output은 t+1 시점의 Input중 하나로 들어갑니다.
             decoder_input = output
             # print(output[0])
