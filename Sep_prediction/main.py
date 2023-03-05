@@ -31,7 +31,7 @@ if args.model == "e":
 else:
     data_loader, fitted_ss = return_dataloaders(model=args.model)
 
-EPOCHS = 1
+EPOCHS = 1000
 LR = 0.001
 
 if args.model == "e":
