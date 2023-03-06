@@ -45,7 +45,7 @@ class Decoder(nn.Module):
         self.num_layers = num_layers
 
         self.lstm = nn.LSTM(
-            input_size=input_size,
+            input_size=hidden_size+1+10,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
@@ -93,8 +93,8 @@ class Decoder(nn.Module):
         )
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
-
-        # print("new input size: ", new_input.size()) # 32, 75, 1
+        new_input = new_input.permute(0, 2, 1)
+        print("new input size: ", new_input.size()) # 32, 1, 75
 
         _, hidden = self.lstm(new_input, hidden) 
 

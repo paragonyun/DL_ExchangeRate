@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import torch.nn.functional as F
 
 class Encoder(nn.Module):
     """Cell은 LSTM으로 했습니다."""
@@ -23,6 +23,8 @@ class Encoder(nn.Module):
             num_layers=num_layers,
             batch_first=True,
         )
+        
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
@@ -44,7 +46,7 @@ class Decoder(nn.Module):
         self.num_layers = num_layers
 
         self.lstm = nn.LSTM(
-            input_size=input_size,
+            input_size=hidden_size+1,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
@@ -53,6 +55,7 @@ class Decoder(nn.Module):
         self.encoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
         self.decoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
         self.value_weight = nn.Linear(in_features=self.hidden_size, out_features=1, bias=False)
+
 
         self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
 
@@ -65,6 +68,7 @@ class Decoder(nn.Module):
         # print(self.encoder_weight(encoder_output).size())
         # print(self.decoder_weight(hidden[0].permute(1, 0, 2)).size())
         # print((self.encoder_weight(encoder_output) + self.decoder_weight(hidden[0].permute(1, 0, 2))).size() )
+
         attn_scores = self.value_weight(
             torch.tanh(
                 self.encoder_weight(encoder_output) + 
@@ -78,20 +82,21 @@ class Decoder(nn.Module):
         # print(attn_weight.size())
         context_vector = torch.bmm(attn_weight.unsqueeze(1), encoder_output).squeeze(1)
         # print("CV : ", context_vector.size()) # 32, 64
-
+        # print(x, x.size())  # 32, 1 이긴 한데.. 갈 수록 똑같은 값만 return?
+        # print("TEST:", torch.cat((context_vector, x), dim=1).size()) # 이거만 하면 32, 65
+        # print(torch.cat((context_vector, x), dim=1)[0])
+        # print(torch.cat((context_vector, x), dim=1)[1])
         new_input = torch.cat((context_vector, x), dim=1).unsqueeze(-1)
 
-        # new_input = new_input.permute(0, 2, 1)
-        # print("new input size: ", new_input.size()) # 32, 65, 1
+        new_input = new_input.permute(0, 2, 1)
+        print("new input size: ", new_input.size()) # 32, 1, 65
 
-        _, hidden = self.lstm(new_input, hidden) 
-
+        _, hidden = self.lstm(new_input, hidden)  # hidden[0]=> hidden state / hidden[1] => cell state
         # print(output.size()) # 32, 65, 64
         # print("output Size : ", output.size()) # 32, 64
         # print("hidden Size : ", hidden[0].size()) # 1, 32, 64
         # print("Last Hidden : ", hidden[0][-1].size()) # 32, 64 오!! 이거네
-
-        fin_output = self.fin_linear(hidden[0][-1])
+        fin_output = self.fin_linear(hidden[0][-1]) # hidden state의 마지막 시점꺼 활용
         # print("Final Ouptut Size : ", fin_output.size()) # 32, 1
 
         return fin_output, hidden, attn_weight
