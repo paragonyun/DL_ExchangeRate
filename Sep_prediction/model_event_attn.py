@@ -56,7 +56,7 @@ class Decoder(nn.Module):
         self.decoder_weight = nn.Linear(in_features=self.hidden_size, out_features=self.hidden_size, bias=False)
         self.value_weight = nn.Linear(in_features=self.hidden_size, out_features=1, bias=False)
 
-        self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
+        self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=1)
 
         self.event_score = nn.Linear(in_features=10, out_features=10)        
 
@@ -94,7 +94,7 @@ class Decoder(nn.Module):
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
         new_input = new_input.permute(0, 2, 1)
-        print("new input size: ", new_input.size()) # 32, 1, 75
+        # print("new input size: ", new_input.size()) # 32, 1, 75
 
         _, hidden = self.lstm(new_input, hidden) 
 
@@ -117,7 +117,7 @@ class EventAttentionSeq2SeqModel(nn.Module):
         self.hidden_size = hidden_size
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = Decoder(vectorized_events_mat=vectorized_events_mat, input_size=input_size, hidden_size=hidden_size)
+        self.decoder = Decoder(vectorized_events_mat=vectorized_events_mat, input_size=75, hidden_size=hidden_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, inputs, target_len):  # X  # OW

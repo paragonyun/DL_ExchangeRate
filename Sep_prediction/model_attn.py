@@ -57,7 +57,7 @@ class Decoder(nn.Module):
         self.value_weight = nn.Linear(in_features=self.hidden_size, out_features=1, bias=False)
 
 
-        self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=self.input_size)
+        self.fin_linear = nn.Linear(in_features=self.hidden_size, out_features=1)
 
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
@@ -89,7 +89,7 @@ class Decoder(nn.Module):
         new_input = torch.cat((context_vector, x), dim=1).unsqueeze(-1)
 
         new_input = new_input.permute(0, 2, 1)
-        print("new input size: ", new_input.size()) # 32, 1, 65
+        # print("new input size: ", new_input.size()) # 32, 1, 65
 
         _, hidden = self.lstm(new_input, hidden)  # hidden[0]=> hidden state / hidden[1] => cell state
         # print(output.size()) # 32, 65, 64
@@ -110,7 +110,7 @@ class AttentionSeq2SeqModel(nn.Module):
         self.hidden_size = hidden_size
 
         self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = Decoder(input_size=input_size, hidden_size=hidden_size)
+        self.decoder = Decoder(input_size=65, hidden_size=hidden_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def forward(self, inputs, target_len):  # X  # OW
@@ -129,7 +129,7 @@ class AttentionSeq2SeqModel(nn.Module):
         ## Decoder (예상값 출력)
         for t in range(target_len):  # OW=7이므로 7개의 out을 뱉습니다.
             output, de_hidden, attn_weight = self.decoder(decoder_input, hidden=de_hidden, encoder_output=encoder_output)
-
+            # print(output.size())
             # output = output.squeeze(1)
 
             # t시점의 output은 t+1 시점의 Input중 하나로 들어갑니다.
