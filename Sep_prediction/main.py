@@ -49,7 +49,7 @@ if args.model == "e":
 elif args.model == "a":
     model = AttentionSeq2SeqModel( hidden_size=64).to(device) 
 elif args.model == "n":
-    model = normal = NormalSeq2SeqModel(input_size=1, hidden_size=64).to(device)
+    model = NormalSeq2SeqModel(input_size=1, hidden_size=64).to(device)
 
 
 optimizer = optim.Adam(model.parameters(), lr=LR)
