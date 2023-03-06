@@ -11,9 +11,11 @@ def return_dataloaders(model="e"):
         Dataset = NormalSeq2SeqDataset(df=df, IW=14, OW=7, stride=1, model="e")
         loader = DataLoader(Dataset, batch_size=32)
 
-        return loader,  Dataset.event_lst, Dataset.fitted_mm
+        # return loader,  Dataset.event_lst, Dataset.fitted_mm
+        return loader,  Dataset.event_lst
     else:
         Dataset = NormalSeq2SeqDataset(df=df, IW=14, OW=7, stride=1, model="a")
         loader = DataLoader(Dataset, batch_size=32)
 
-        return loader, Dataset.fitted_ss
+        # return loader, Dataset.fitted_ss
+        return loader

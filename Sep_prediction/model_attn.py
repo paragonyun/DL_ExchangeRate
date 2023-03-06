@@ -91,12 +91,15 @@ class Decoder(nn.Module):
         new_input = new_input.permute(0, 2, 1)
         # print("new input size: ", new_input.size()) # 32, 1, 65
 
-        _, hidden = self.lstm(new_input, hidden)  # hidden[0]=> hidden state / hidden[1] => cell state
+        # _, hidden = self.lstm(new_input, hidden)  # hidden[0]=> hidden state / hidden[1] => cell state
+        lstm_output, hidden = self.lstm(new_input, hidden)  # hidden[0]=> hidden state / hidden[1] => cell state
+        # print(lstm_output.squeeze().size())        
+        
         # print(output.size()) # 32, 65, 64
         # print("output Size : ", output.size()) # 32, 64
         # print("hidden Size : ", hidden[0].size()) # 1, 32, 64
         # print("Last Hidden : ", hidden[0][-1].size()) # 32, 64 오!! 이거네
-        fin_output = self.fin_linear(hidden[0][-1]) # hidden state의 마지막 시점꺼 활용
+        fin_output = self.fin_linear(lstm_output.squeeze()) # hidden state의 마지막 시점꺼 활용
         # print("Final Ouptut Size : ", fin_output.size()) # 32, 1
 
         return fin_output, hidden, attn_weight

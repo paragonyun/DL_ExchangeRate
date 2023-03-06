@@ -96,14 +96,15 @@ class Decoder(nn.Module):
         new_input = new_input.permute(0, 2, 1)
         # print("new input size: ", new_input.size()) # 32, 1, 75
 
-        _, hidden = self.lstm(new_input, hidden) 
+        # _, hidden = self.lstm(new_input, hidden) 
+        lstm_output, hidden = self.lstm(new_input, hidden) 
 
         # print(output.size()) # 32, 75, 64
         # print("output Size : ", output.size()) # 32, 64
         # print("hidden Size : ", hidden[0].size()) # 1, 32, 64
         # print("Last Hidden : ", hidden[0][-1].size()) # 32, 64 오!! 이거네
 
-        fin_output = self.fin_linear(hidden[0][-1])
+        fin_output = self.fin_linear(lstm_output.squeeze())
         # print("Final Ouptut Size : ", fin_output.size()) # 32, 1
 
         return fin_output, hidden, attn_weight, sim_scores

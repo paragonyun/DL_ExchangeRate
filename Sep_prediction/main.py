@@ -21,15 +21,24 @@ seed_everything(seed=43)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"현재 모드 : {args.model}")
 # 전처리, 세트화가 완료된 데이터로더를 만듭니다.
+# if args.model == "e":
+#     data_loader, events_mat, fitted_ss = return_dataloaders(model=args.model)
+#     with torch.no_grad():
+#         vectorizer = nn.Linear(in_features=7, out_features=64, bias=False)
+#         nn.init.xavier_uniform_(vectorizer.weight)
+#         vectorized_events = torch.tensor(vectorizer(events_mat).detach().numpy()).to(device)
+
+# else:
+#     data_loader, fitted_ss = return_dataloaders(model=args.model)
 if args.model == "e":
-    data_loader, events_mat, fitted_ss = return_dataloaders(model=args.model)
+    data_loader, events_mat= return_dataloaders(model=args.model)
     with torch.no_grad():
         vectorizer = nn.Linear(in_features=7, out_features=64, bias=False)
         nn.init.xavier_uniform_(vectorizer.weight)
         vectorized_events = torch.tensor(vectorizer(events_mat).detach().numpy()).to(device)
 
 else:
-    data_loader, fitted_ss = return_dataloaders(model=args.model)
+    data_loader = return_dataloaders(model=args.model)
 
 EPOCHS = 1000
 LR = 0.001
@@ -65,8 +74,8 @@ print("✨Start Evaluation...✨")
 
 ori_df = pd.read_csv("./data/til_aug_rate.csv")
 diffs = ori_df["rate"].diff()
-scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
-input_data = torch.tensor(scaled).to(device).float()
+# scaled = fitted_ss.transform(diffs.iloc[-14:].values.reshape(-1, 1))
+input_data = torch.tensor(diffs.iloc[-14:].values.reshape(-1, 1)).to(device).float()
 
 if args.model == "e":
     model.load_state_dict(torch.load("./EVENT_BEST_MODEL.pth"))
@@ -85,10 +94,10 @@ actuals = ori_df["rate"].to_numpy()
 print("Original Prediction (Before Inverse Transform)")
 print(predict, "\n")
 
-print("Inverse Trasforming...")
-predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
-actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
-print("Inversed Changes\n", predict)
+# print("Inverse Trasforming...")
+# predict = fitted_ss.inverse_transform(predict.reshape(-1, 1))
+# actuals = fitted_ss.inverse_transform(actuals.reshape(-1, 1))
+# print("Inversed Changes\n", predict)
 
 # predictions = change_to_original(df=ori_df, preds=predict)
 
