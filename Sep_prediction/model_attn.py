@@ -103,13 +103,12 @@ class Decoder(nn.Module):
 
 
 class AttentionSeq2SeqModel(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self,  hidden_size):
         super(AttentionSeq2SeqModel, self).__init__()
 
-        self.input_size = input_size
         self.hidden_size = hidden_size
 
-        self.encoder = Encoder(input_size=input_size, hidden_size=hidden_size)
+        self.encoder = Encoder(input_size=1, hidden_size=hidden_size)
         self.decoder = Decoder(input_size=65, hidden_size=hidden_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 

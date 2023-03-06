@@ -34,10 +34,11 @@ else:
 EPOCHS = 1000
 LR = 0.001
 
+
 if args.model == "e":
-    model = EventAttentionSeq2SeqModel(vectorized_events_mat=vectorized_events, input_size=1, hidden_size=64).to(device)
+    model = EventAttentionSeq2SeqModel(vectorized_events_mat=vectorized_events,  hidden_size=64).to(device)
 elif args.model == "a":
-    model = AttentionSeq2SeqModel(input_size=1, hidden_size=64).to(device)
+    model = AttentionSeq2SeqModel( hidden_size=64).to(device) 
 elif args.model == "n":
     model = normal = NormalSeq2SeqModel(input_size=1, hidden_size=64).to(device)
 
