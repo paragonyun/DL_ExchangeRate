@@ -34,7 +34,7 @@
 
 ## ✨ Training Methodology
 학습 방식의 차이보다 기본적인 모델의 구조차이를 확인하는 것이 목표였기 때문에, 학습 방식에 대한 튜닝은 그렇게까지 세부적으로 진행하지는 않았습니다.
-- `Epoch` : 3000
+- `Epoch` : 1000
 - `Optimizer` : Adam
-- `Larning Rate` : 0.01 
+- `Larning Rate` : 0.001 
 - `Scheduler` : None
