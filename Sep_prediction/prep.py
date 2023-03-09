@@ -1,4 +1,4 @@
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
 import torch
@@ -14,9 +14,9 @@ def return_prep_data(ori_df, model="e"):
     ori_df = pd.concat([first, ori_df], axis=0)
     copy_df = ori_df.copy()
 
-    # print("Scaling 진행중...")
-    # ss = StandardScaler()
-    # copy_df["rate"] = ss.fit_transform(copy_df["rate"].values.reshape(-1, 1))
+    print("Scaling 진행중...")
+    ss = MinMaxScaler()
+    copy_df["rate"] = ss.fit_transform(copy_df["rate"].values.reshape(-1, 1))
 
     if model == "e":
         print("Impact Event를 찾는 중...")
@@ -25,13 +25,13 @@ def return_prep_data(ori_df, model="e"):
         event_tensor = find_impact_events(ori_df=ori_df, times=times)
         
         print("✅ Done!")
-        # return copy_df, event_tensor, ss
-        return copy_df, event_tensor
+        return copy_df, event_tensor, ss
+        # return copy_df, event_tensor
     
     else:
         print("✅ Done!")
-        # return ori_df, ss
-        return ori_df
+        return ori_df, ss
+        # return ori_df
 
 
 def find_impact_events(ori_df, times: list):
