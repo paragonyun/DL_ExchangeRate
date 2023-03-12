@@ -25,8 +25,11 @@ class Encoder(nn.Module):
             dropout=0.3
         )
 
+        self.ln = nn.LayerNorm(self.hidden_size)
+
     def forward(self, x):
         lstm_output, self.hidden = self.lstm(x)
+        lstm_output = self.ln(lstm_output)
 
         return lstm_output, self.hidden
 
@@ -64,6 +67,8 @@ class Decoder(nn.Module):
 
         self.vectorized_events_mat=vectorized_events_mat
 
+        self.ln = nn.LayerNorm(self.hidden_size)
+
     def forward(self, x, hidden, encoder_output):
         bs = x.size(0)
         ## hidden state활용
@@ -99,6 +104,7 @@ class Decoder(nn.Module):
 
         # _, hidden = self.lstm(new_input, hidden) 
         lstm_output, hidden = self.lstm(new_input, hidden) 
+        lstm_output = self.ln(lstm_output)
         lstm_output = lstm_output.permute(1,0,2)[0]
         # print(output.size()) # 32, 75, 64
         # print("output Size : ", output.size()) # 32, 64

@@ -21,14 +21,14 @@ class NormalSeq2SeqDataset(Dataset):
 
     def __init__(self, df, IW=14, OW=7, stride=1, model="e"):
         # 전처리
-        if model == "e":
-            prep_df, self.event_lst, self.fitted_mm = return_prep_data(df, model="e")
-        else:
-            prep_df, self.fitted_ss = return_prep_data(df, model="a")
         # if model == "e":
-        #     prep_df, self.event_lst = return_prep_data(df, model="e")
+        #     prep_df, self.event_lst, self.fitted_mm = return_prep_data(df, model="e")
         # else:
-        #     prep_df = return_prep_data(df, model="a")
+        #     prep_df, self.fitted_ss = return_prep_data(df, model="a")
+        if model == "e":
+            prep_df, self.event_lst = return_prep_data(df, model="e")
+        else:
+            prep_df = return_prep_data(df, model="a")
 
         Length = df.shape[0]
 
