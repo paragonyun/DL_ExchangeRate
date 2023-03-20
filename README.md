@@ -26,6 +26,9 @@
 
 `Event_Seq2Seq` : Event Attention이 적용된 모델입니다.  
 
+`Sep_Prediction` : 모델이 급격한 변화에도 강건한지 확인하기 위한 코드입니다. `argparser`로 모델 테스팅을 더 간결화 시켰습니다
+
+
 
 <br>
 
