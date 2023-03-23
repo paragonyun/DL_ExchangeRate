@@ -32,6 +32,12 @@
 
 <br>
 
+## TODO
+- Validation
+- Compare with "Real Input Sequence" not Context Vector
+- Change num_layers, to GRU etc... 
+- with WandB
+
 <br>
 
 
