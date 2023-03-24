@@ -100,16 +100,10 @@ class Decoder(nn.Module):
         # And concatenate them!
         new_input = torch.cat((context_vector, sim_scores, x), dim=1).unsqueeze(-1) 
         new_input = new_input.permute(0, 2, 1)
-        # print("new input size: ", new_input.size()) # 32, 1, 75
 
-        # _, hidden = self.lstm(new_input, hidden) 
         lstm_output, hidden = self.lstm(new_input, hidden) 
         lstm_output = self.ln(lstm_output)
         lstm_output = lstm_output.permute(1,0,2)[0]
-        # print(output.size()) # 32, 75, 64
-        # print("output Size : ", output.size()) # 32, 64
-        # print("hidden Size : ", hidden[0].size()) # 1, 32, 64
-        # print("Last Hidden : ", hidden[0][-1].size()) # 32, 64 오!! 이거네
 
         fin_output = self.fin_linear(lstm_output)
         # print("Final Ouptut Size : ", fin_output.size()) # 32, 1
